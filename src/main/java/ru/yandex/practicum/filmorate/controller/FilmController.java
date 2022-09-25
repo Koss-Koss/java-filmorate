@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.controller.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -49,36 +48,21 @@ public class FilmController {
         LocalDate releaseDate = film.getReleaseDate();
         if (film.getReleaseDate() == null) { return; }
         if (releaseDate != null && releaseDate.isBefore(LocalDate.parse("1895-12-28"))) {
-            String message = "Дата релиза фильма не может быть ранее 28.12.1895";
-            log.warn(message);
-            throw new ValidationException(message);
+            throw new ValidationException("Дата релиза фильма не может быть ранее 28.12.1895");
         }
     }
 
     private void validateId(Film film) {
         Integer id = film.getId();
         if (id == null) {
-            String message = "id фильма - обязательное поле";
-            log.warn(message);
-            throw new ValidationException(message);
+            throw new ValidationException("id фильма - обязательное поле");
         }
         if (id <= 0) {
-            String message = "id фильма не может быть отрицательным или равным нулю";
-            log.warn(message);
-            throw new ValidationException(message);
+            throw new ValidationException("id фильма не может быть отрицательным или равным нулю");
         }
         if (!films.containsKey(id)) {
-            String message = "При PUT-запросе должен существовать фильм с указанным id";
-            log.warn(message);
-            throw new ValidationException(message);
+            throw new ValidationException("При PUT-запросе должен существовать фильм с указанным id");
         }
-    }
-
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<String> handleException(ValidationException exception) {
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(exception.getMessage());
     }
 
 }

@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.controller.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -50,36 +49,21 @@ public class UserController {
 
     private void validateLogin(User user) {
         if (user.getLogin().contains(" ")) {
-            String message = "login не может содержать пробелы";
-            log.warn(message);
-            throw new ValidationException(message);
+            throw new ValidationException("login не может содержать пробелы");
         }
     }
 
     private void validateId(User user) {
         Integer id = user.getId();
         if (id == null) {
-            String message = "id пользователя - обязательное поле";
-            log.warn(message);
-            throw new ValidationException(message);
+            throw new ValidationException("id пользователя - обязательное поле");
         }
         if (id <= 0) {
-            String message = "id пользователя не может быть отрицательным или равным нулю";
-            log.warn(message);
-            throw new ValidationException(message);
+            throw new ValidationException("id пользователя не может быть отрицательным или равным нулю");
         }
         if (!users.containsKey(id)) {
-            String message = "При PUT-запросе должен существовать пользователь с указанным id";
-            log.warn(message);
-            throw new ValidationException(message);
+            throw new ValidationException("При PUT-запросе должен существовать пользователь с указанным id");
         }
-    }
-
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<String> handleException(ValidationException exception) {
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(exception.getMessage());
     }
 
 }
