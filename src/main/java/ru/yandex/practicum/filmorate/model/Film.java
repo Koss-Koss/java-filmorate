@@ -5,10 +5,11 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.Comparator;
 
 @Data
 @AllArgsConstructor
-public class Film {
+public class Film implements Comparable<Film> {
     private Integer id;
     @NotBlank(message = "Название фильма - обязательное поле и не может быть пустым")
     private String name;
@@ -17,5 +18,13 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма указыввается в минутах и должна быть положительной")
     private int duration;
+    private int numberOfLikes;
+
+    @Override
+    public int compareTo(Film o) {
+        return Comparator.comparing(Film::getNumberOfLikes).reversed()
+                .thenComparingInt(Film::getId)
+                .compare(this, o);
+    }
 
 }

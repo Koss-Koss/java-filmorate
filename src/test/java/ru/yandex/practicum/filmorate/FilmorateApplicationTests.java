@@ -9,7 +9,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import ru.yandex.practicum.filmorate.controller.exception.ValidationException;
+import ru.yandex.practicum.filmorate.controller.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.controller.exception.FilmValidationException;
+import ru.yandex.practicum.filmorate.controller.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.controller.exception.UserValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -37,9 +40,9 @@ class FilmorateApplicationTests {
 	@Test
 	void ValidFilmValidationTest() throws Exception {
 		Film validFilm =
-				new Film(null, "TestFilmName", "Test".repeat(50), LocalDate.now(), 99);
+				new Film(null, "TestFilmName", "Test".repeat(50), LocalDate.now(), 99, 0);
 		Film validFilmExcepted =
-				new Film(1, "TestFilmName", "Test".repeat(50), LocalDate.now(), 99);
+				new Film(1, "TestFilmName", "Test".repeat(50), LocalDate.now(), 99, 0);
 		mockMvc.perform(post(PATH_FILMS)
 				.content(objectMapper.writeValueAsString(validFilm))
 				.contentType(MediaType.APPLICATION_JSON))
@@ -47,9 +50,9 @@ class FilmorateApplicationTests {
 					.andExpect(content().json(objectMapper.writeValueAsString(validFilmExcepted)));
 
 		Film editValidFilm =
-				new Film(1, "TestFilmName edit", "Edit".repeat(50), LocalDate.of(2022, Month.AUGUST, 11), 111);
+				new Film(1, "TestFilmName edit", "Edit".repeat(50), LocalDate.of(2022, Month.AUGUST, 11), 111, 0);
 		Film editValidFilmExcepted =
-				new Film(1, "TestFilmName edit", "Edit".repeat(50), LocalDate.of(2022, Month.AUGUST, 11), 111);
+				new Film(1, "TestFilmName edit", "Edit".repeat(50), LocalDate.of(2022, Month.AUGUST, 11), 111, 0);
 		mockMvc.perform(put(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(editValidFilm))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -77,25 +80,25 @@ class FilmorateApplicationTests {
 						assertTrue(mvcResult.getResolvedException() instanceof HttpMessageNotReadableException));
 
 		Film invalidFilmWithoutId =
-				new Film(null, "TestFilmName", "TestFilmDescription", LocalDate.now(), 99);
+				new Film(null, "TestFilmName", "TestFilmDescription", LocalDate.now(), 99, 0);
 		mockMvc.perform(put(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithoutId))
 						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isInternalServerError())
+				.andExpect(status().isBadRequest())
 				.andExpect(mvcResult ->
-						assertTrue(mvcResult.getResolvedException() instanceof ValidationException));
+						assertTrue(mvcResult.getResolvedException() instanceof FilmValidationException));
 
 		Film invalidFilmWithNonExistentId =
-				new Film(999, "TestFilmName", "TestFilmDescription", LocalDate.now(), 99);
+				new Film(999, "TestFilmName", "TestFilmDescription", LocalDate.now(), 99, 0);
 		mockMvc.perform(put(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithNonExistentId))
 						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isInternalServerError())
+				.andExpect(status().isNotFound())
 				.andExpect(mvcResult ->
-						assertTrue(mvcResult.getResolvedException() instanceof ValidationException));
+						assertTrue(mvcResult.getResolvedException() instanceof FilmNotFoundException));
 
 		Film invalidFilmWithoutName =
-				new Film(null, null, "TestFilmDescription", LocalDate.now(), 99);
+				new Film(null, null, "TestFilmDescription", LocalDate.now(), 99, 0);
 		mockMvc.perform(post(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithoutName))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -110,7 +113,7 @@ class FilmorateApplicationTests {
 						assertTrue(mvcResult.getResolvedException() instanceof MethodArgumentNotValidException));
 
 		Film invalidFilmWithEmptyName =
-				new Film(null, "", "TestFilmDescription", LocalDate.now(), 99);
+				new Film(null, "", "TestFilmDescription", LocalDate.now(), 99, 0);
 		mockMvc.perform(post(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithEmptyName))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -125,7 +128,7 @@ class FilmorateApplicationTests {
 						assertTrue(mvcResult.getResolvedException() instanceof MethodArgumentNotValidException));
 
 		Film invalidFilmWithNameOverLimit =
-				new Film(null, "TestFilmName", "X".repeat(201), LocalDate.now(), 99);
+				new Film(null, "TestFilmName", "X".repeat(201), LocalDate.now(), 99, 0);
 		mockMvc.perform(post(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithNameOverLimit))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -133,7 +136,7 @@ class FilmorateApplicationTests {
 				.andExpect(mvcResult ->
 						assertTrue(mvcResult.getResolvedException() instanceof MethodArgumentNotValidException));
 		invalidFilmWithNameOverLimit =
-				new Film(0, "TestFilmName", "X".repeat(201), LocalDate.now(), 99);
+				new Film(0, "TestFilmName", "X".repeat(201), LocalDate.now(), 99, 0);
 		mockMvc.perform(put(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithNameOverLimit))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -142,24 +145,24 @@ class FilmorateApplicationTests {
 						assertTrue(mvcResult.getResolvedException() instanceof MethodArgumentNotValidException));
 
 		Film invalidFilmWithReleaseDateBeforeEraOfCinema =
-				new Film(null, "TestFilmName", "TestFilmDescription", LocalDate.of(1895, Month.DECEMBER, 27), 99);
+				new Film(null, "TestFilmName", "TestFilmDescription", LocalDate.of(1895, Month.DECEMBER, 27), 99, 0);
 		mockMvc.perform(post(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithReleaseDateBeforeEraOfCinema))
 						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isInternalServerError())
+				.andExpect(status().isBadRequest())
 				.andExpect(mvcResult ->
-						assertTrue(mvcResult.getResolvedException() instanceof ValidationException));
+						assertTrue(mvcResult.getResolvedException() instanceof FilmValidationException));
 		invalidFilmWithReleaseDateBeforeEraOfCinema =
-				new Film(0, "TestFilmName", "TestFilmDescription", LocalDate.of(1895, Month.DECEMBER, 27), 99);
+				new Film(0, "TestFilmName", "TestFilmDescription", LocalDate.of(1895, Month.DECEMBER, 27), 99, 0);
 		mockMvc.perform(put(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithReleaseDateBeforeEraOfCinema))
 						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isInternalServerError())
+				.andExpect(status().isNotFound())
 				.andExpect(mvcResult ->
-						assertTrue(mvcResult.getResolvedException() instanceof ValidationException));
+						assertTrue(mvcResult.getResolvedException() instanceof FilmNotFoundException));
 
 		Film invalidFilmWithNegativeDuration =
-				new Film(null, "TestFilmName", "TestFilmDescription", LocalDate.now(), -1);
+				new Film(null, "TestFilmName", "TestFilmDescription", LocalDate.now(), -1, 0);
 		mockMvc.perform(post(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithNegativeDuration))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -167,7 +170,7 @@ class FilmorateApplicationTests {
 				.andExpect(mvcResult ->
 						assertTrue(mvcResult.getResolvedException() instanceof MethodArgumentNotValidException));
 		invalidFilmWithNegativeDuration =
-				new Film(0, "TestFilmName", "TestFilmDescription", LocalDate.now(), -1);
+				new Film(0, "TestFilmName", "TestFilmDescription", LocalDate.now(), -1, 0);
 		mockMvc.perform(put(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithNegativeDuration))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -220,18 +223,18 @@ class FilmorateApplicationTests {
 		mockMvc.perform(put(PATH_USERS)
 						.content(objectMapper.writeValueAsString(invalidUserWithoutId))
 						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isInternalServerError())
+				.andExpect(status().isBadRequest())
 				.andExpect(mvcResult ->
-						assertTrue(mvcResult.getResolvedException() instanceof ValidationException));
+						assertTrue(mvcResult.getResolvedException() instanceof UserValidationException));
 
 		User invalidUserWithNonExistentId =
 				new User(999, "test@test.ru", "TestLogin", "TestName", LocalDate.now());
 		mockMvc.perform(put(PATH_USERS)
 						.content(objectMapper.writeValueAsString(invalidUserWithNonExistentId))
 						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isInternalServerError())
+				.andExpect(status().isNotFound())
 				.andExpect(mvcResult ->
-						assertTrue(mvcResult.getResolvedException() instanceof ValidationException));
+						assertTrue(mvcResult.getResolvedException() instanceof UserNotFoundException));
 
 		User invalidUserWithoutEmail =
 				new User(null, null, "TestLogin", "TestName", LocalDate.now());
@@ -323,17 +326,17 @@ class FilmorateApplicationTests {
 		mockMvc.perform(post(PATH_USERS)
 						.content(objectMapper.writeValueAsString(invalidUserWithLoginContainingSpace))
 						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isInternalServerError())
+				.andExpect(status().isBadRequest())
 				.andExpect(mvcResult ->
-						assertTrue(mvcResult.getResolvedException() instanceof ValidationException));
+						assertTrue(mvcResult.getResolvedException() instanceof UserValidationException));
 		invalidUserWithLoginContainingSpace =
 				new User(0, "test@test.ru", "Test Login", "TestName", LocalDate.now());
 		mockMvc.perform(put(PATH_USERS)
 						.content(objectMapper.writeValueAsString(invalidUserWithLoginContainingSpace))
 						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isInternalServerError())
+				.andExpect(status().isNotFound())
 				.andExpect(mvcResult ->
-						assertTrue(mvcResult.getResolvedException() instanceof ValidationException));
+						assertTrue(mvcResult.getResolvedException() instanceof UserNotFoundException));
 
 		User invalidUserWithBirthdayInFuture =
 				new User(null, "test@test.ru", "TestLogin", "TestName", LocalDate.now().plusDays(1));
