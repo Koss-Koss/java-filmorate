@@ -30,7 +30,7 @@ public class FilmValidationService {
         this.inMemoryPopularFilmsStorage = inMemoryPopularFilmsStorage;
     }
 
-    void validateFilmReleaseDate(Film film) {
+    protected void validateFilmReleaseDate(Film film) {
         LocalDate releaseDate = film.getReleaseDate();
         if (film.getReleaseDate() == null) { return; }
         if (releaseDate != null && releaseDate.isBefore(BEGINNING_OF_CINEMA_ERA)) {
@@ -38,7 +38,7 @@ public class FilmValidationService {
         }
     }
 
-    void validateFilmId(Integer id) {
+    protected void validateFilmId(Integer id) {
         if (id == null) {
             throw new FilmValidationException("id: id фильма - обязательное поле");
         }
@@ -50,14 +50,14 @@ public class FilmValidationService {
         }
     }
 
-    void validateIsLike(Integer filmId, User user) {
+    protected void validateIsLike(Integer filmId, User user) {
         if (likeStorage.getById(filmId).contains(user)) {
             throw new UserValidationException("id: Попытка повторного добавления лайка пользователя id=" +
                     user.getId() + " к фильму id=" + filmId);
         }
     }
 
-    void validateNotLike(Integer filmId, User user) {
+    protected void validateNotLike(Integer filmId, User user) {
         if (!likeStorage.getById(filmId).contains(user)) {
             throw new UserValidationException("id: Попытка удаления отсутствующего лайка пользователя id=" +
                     user.getId() + " к фильму id=" + filmId);

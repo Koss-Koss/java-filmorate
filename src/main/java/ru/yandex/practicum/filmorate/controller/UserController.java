@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
@@ -10,13 +11,10 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService service;
-
-    public UserController(UserService service) {
-        this.service = service;
-    }
 
     @GetMapping()
     public List<User> findAll() {

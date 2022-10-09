@@ -21,12 +21,12 @@ public class UserValidationService {
         this.friendStorage = friendStorage;
     }
 
-    void validateUserLogin(User user) {
+    protected void validateUserLogin(User user) {
         if (user.getLogin().contains(" ")) {
             throw new UserValidationException("login: login не может содержать пробелы");
         }
     }
-    void validateUserId(Integer id) {
+    protected void validateUserId(Integer id) {
         if (id == null) {
             throw new UserValidationException("id: id пользователя - обязательное поле");
         }
@@ -38,21 +38,21 @@ public class UserValidationService {
         }
     }
 
-    void validateIsFriend(Integer userId, User user) {
+    protected void validateIsFriend(Integer userId, User user) {
         if (friendStorage.getById(userId).contains(user)) {
             throw new UserValidationException("id: Попытка повторного добавления пользователю id=" +
                     userId + " друга id=" + user.getId());
         }
     }
 
-    void validateNotFriend(Integer userId, User user) {
+    protected void validateNotFriend(Integer userId, User user) {
         if (!friendStorage.getById(userId).contains(user)) {
             throw new UserValidationException("id: Попытка удаления у пользователя id=" +
                     userId + " отсутствующего друга id=" + user.getId());
         }
     }
 
-    void validateAutoFriend(Integer userId, Integer friendId) {
+    protected void validateAutoFriend(Integer userId, Integer friendId) {
         if (userId == friendId) {
             throw new UserValidationException("id: Попытка добавления в друзья пользователю id=" +
                     userId + " самого себя");
