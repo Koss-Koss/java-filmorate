@@ -69,7 +69,7 @@ public class FilmService {
     }
 
     public void addLike(Integer filmId, Integer userId) {
-        Film film = (Film)filmStorage.getById(filmId);
+        Film film = filmStorage.getById(filmId);
         User user = (User)userStorage.getById(userId);
         filmValidationService.validateFilmId(filmId);
         userValidationService.validateUserId(userId);

@@ -9,6 +9,6 @@ import java.util.Map;
 
 @Component
 @Qualifier("UserStorage")
-public class InMemoryUserStorage extends ObjectStorage {
+public class InMemoryUserStorage extends ObjectStorage<User> {
     private final Map<Integer, User> users = getMap();
 }
