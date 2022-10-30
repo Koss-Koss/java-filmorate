@@ -9,6 +9,6 @@ import java.util.Map;
 
 @Component
 @Qualifier("FilmStorage")
-public class InMemoryFilmStorage extends ObjectStorage<Film> {
+public class InMemoryFilmStorage extends ObjectStorage {
     private final Map<Integer, Film> films = getMap();
 }

@@ -15,12 +15,12 @@ import java.util.Set;
 @Slf4j
 public class UserService {
 
-    private final Storage userStorage;
+    private final Storage<User> userStorage;
     private final StorageOfSets friendStorage;
     private final UserValidationService userValidationService;
 
     public UserService(
-            @Qualifier("UserStorage") Storage userStorage,
+            @Qualifier("UserStorage") Storage<User> userStorage,
             @Qualifier("FriendStorage") StorageOfSets friendStorage,
             UserValidationService userValidationService) {
         this.userStorage = userStorage;
@@ -34,7 +34,7 @@ public class UserService {
 
     public User findUser(Integer userId) {
         userValidationService.validateUserId(userId);
-        return (User)userStorage.getById(userId);
+        return userStorage.getById(userId);
     }
 
     public User create(User user) {
@@ -58,8 +58,8 @@ public class UserService {
     }
 
     public void addFriend(Integer userId, Integer friendId) {
-        User user = (User)userStorage.getById(userId);
-        User friend = (User)userStorage.getById(friendId);
+        User user = userStorage.getById(userId);
+        User friend = userStorage.getById(friendId);
         userValidationService.validateUserId(userId);
         userValidationService.validateUserId(friendId);
         userValidationService.validateIsFriend(userId, friend);
@@ -71,8 +71,8 @@ public class UserService {
     }
 
     public void deleteFriend(Integer userId, Integer friendId) {
-        User user = (User)userStorage.getById(userId);
-        User friend = (User)userStorage.getById(friendId);
+        User user = userStorage.getById(userId);
+        User friend = userStorage.getById(friendId);
         userValidationService.validateUserId(userId);
         userValidationService.validateUserId(friendId);
         userValidationService.validateNotFriend(userId, friend);
