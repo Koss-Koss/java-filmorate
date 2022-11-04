@@ -11,7 +11,6 @@
 * **RatingMPA** - рейтинг, присвоенный MPA
 * **Likes** - информация о лайках пользователей к фильмам
 * **Friends** - информация об отношении дружбы пользователей друг с другом
-* **FriendshipStatus** - статусы отношения дружбы ('waiting' , 'agree')
 
 ### Связи между моделями (ER-diagram)
 ![ER diagram](filmorate_ER_diagram.png)
@@ -28,7 +27,7 @@ FROM film;
 SELECT film_id,
        name
 FROM film
-ORDER BY number_of_likes DESC
+ORDER BY rate DESC
 LIMIT 10;
 ```
 
@@ -44,11 +43,7 @@ WHERE user_id=17;
 SELECT u.user_id,
        u.login
 FROM user u
-INNER JOIN friends f
-    ON u.user_id = f.agreed_user_id AND f.proposed_user_id = 17 OR
-       u.user_id = f.proposed_user_id AND f.agreed_user_id = 17 
-INNER JOIN friendshipstatus fs
-    ON f.friendship_status_id = fs.friendship_status_id AND fs.value = 'agree';
+INNER JOIN friends f ON f.user_id = 17 AND u.user_id = f.friend_id;
 ```
 
 * Получение списка общих друзей (id и login) пользователей с id=3 и id=17
@@ -56,13 +51,8 @@ INNER JOIN friendshipstatus fs
 SELECT u.user_id,
        u.login
 FROM user u
-INNER JOIN friends f
-    ON (u.user_id = f.agreed_user_id AND f.proposed_user_id = 17 OR
-       u.user_id = f.proposed_user_id AND f.agreed_user_id = 17) AND
-       (u.user_id = f.agreed_user_id AND f.proposed_user_id = 3 OR
-       u.user_id = f.proposed_user_id AND f.agreed_user_id = 3)
-INNER JOIN friendshipstatus fs
-    ON f.friendship_status_id = fs.friendship_status_id AND fs.value = 'agree';
+INNER JOIN friends f ON (f.user_id = 3 AND u.user_id = f.friend_id) AND
+                        (f.user_id = 17 AND u.user_id = f.friend_id);
 ```
 
 ### Пользовательские роли
@@ -85,11 +75,20 @@ INNER JOIN friendshipstatus fs
 (каждый пользователь может поставить лайк фильму один раз)
 * получение указанного количества наиболее популярных фильмов по количеству лайков (по умолчанию - 10 фильмов)
 
-**Отношения дружбы между пользователями**
-* приглашение пользователем другого пользователя в друзья (неподтверждённая дружба)
-* согласие на дружбу с другим пользователем (подтверждённая дружба)
+**Односторонняя дружба между пользователями (по принципу подписки)**
+* приглашение другого пользоателя в друзья и удаление его из списка своих друзей
+  (согласие на дружбу с другим пользователем не требуется;
+  приглашение в друзья означает, что приглашенный становится другом пригласившего, но не наоборот)
 * получение списка друзей пользователя по его id
 * получение списка общих друзей двух пользователей
+
+**Жанры**
+* получение списка всех жанров
+* получение жанра по его id
+
+**Рейтинг MPA**
+* получение списка всех видов рейтинга MPA
+* получение рейтинга MPA по его id
 
 ## Технологии в проекте
 * Java v.11.0.16
