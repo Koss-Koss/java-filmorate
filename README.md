@@ -4,14 +4,15 @@
 
 ## Техническое описание
 
-### Модели
-* **Film** - фильмы
-* **User** - пользователи
-* **Genre** - жанры
-* **RatingMPA** - рейтинг, присвоенный MPA
-* **Likes** - информация о лайках пользователей к фильмам
-* **Friends** - информация об отношении дружбы пользователей друг с другом
-* **FriendshipStatus** - статусы отношения дружбы ('waiting' , 'agree')
+### Таблицы
+* **films** - фильмы
+* **users** - пользователи
+* **genres** - жанры
+* **film_genres** - жанры, присвоенные фильмам
+* **MPA** - рейтинг, присвоенный MPA
+* **likes** - информация о лайках пользователей к фильмам
+* **friends** - информация об отношении дружбы пользователей друг с другом
+* **friendship_Statuses** - статусы отношения дружбы ('waiting' , 'agree')
 
 ### Связи между моделями (ER-diagram)
 ![ER diagram](filmorate_ER_diagram.png)
@@ -20,14 +21,14 @@
 * Получение списка всех фильмов
 ```
 SELECT *
-FROM film;
+FROM films;
 ```
 
 * Получение 10 наиболее популярных фильмов (id и название) по количеству лайков
 ```
 SELECT film_id,
        name
-FROM film
+FROM films
 ORDER BY rate DESC
 LIMIT 10;
 ```
@@ -35,7 +36,7 @@ LIMIT 10;
 * Получение пользователя с id=17
 ```
 SELECT *
-FROM user
+FROM users
 WHERE user_id=17;
 ```
 
@@ -43,7 +44,7 @@ WHERE user_id=17;
 ```
 SELECT u.user_id,
        u.login
-FROM user u
+FROM users u
 INNER JOIN friends f ON f.user_id = 17 AND u.user_id = f.friend_id;
 ```
 
@@ -51,7 +52,7 @@ INNER JOIN friends f ON f.user_id = 17 AND u.user_id = f.friend_id;
 ```
 SELECT u.user_id,
        u.login
-FROM user u
+FROM users u
 INNER JOIN friends f ON (f.user_id = 3 AND u.user_id = f.friend_id) AND
                         (f.user_id = 17 AND u.user_id = f.friend_id);
 ```
