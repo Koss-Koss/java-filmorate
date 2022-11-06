@@ -12,7 +12,7 @@
 * **MPA** - рейтинг, присвоенный MPA
 * **likes** - информация о лайках пользователей к фильмам
 * **friends** - информация об отношении дружбы пользователей друг с другом
-* **friendship_Statuses** - статусы отношения дружбы ('waiting' , 'agree')
+* **friendship_statuses** - статусы отношения дружбы ('waiting' , 'agree')
 
 ### Связи между моделями (ER-diagram)
 ![ER diagram](filmorate_ER_diagram.png)
