@@ -15,16 +15,16 @@ import java.util.List;
 @Slf4j
 public class FilmService {
 
-    private final Storage filmStorage;
-    private final Storage userStorage;
+    private final Storage<Film> filmStorage;
+    private final Storage<User> userStorage;
     private final StorageOfSets likeStorage;
     private final PopularFilmsStorage popularFilmsStorage;
     private final FilmValidationService filmValidationService;
     private final UserValidationService userValidationService;
 
     public FilmService(
-            @Qualifier("FilmStorage") Storage filmStorage,
-            @Qualifier("UserStorage") Storage userStorage,
+            @Qualifier("FilmStorage") Storage<Film> filmStorage,
+            @Qualifier("UserStorage") Storage<User> userStorage,
             @Qualifier("LikeStorage") StorageOfSets likeStorage,
             PopularFilmsStorage popularFilmsStorage,
             FilmValidationService filmValidationService,
@@ -43,7 +43,7 @@ public class FilmService {
 
     public Film findFilm(Integer filmId) {
         filmValidationService.validateFilmId(filmId);
-        return (Film)filmStorage.getById(filmId);
+        return filmStorage.getById(filmId);
     }
 
     public Film create(Film film) {
@@ -69,8 +69,8 @@ public class FilmService {
     }
 
     public void addLike(Integer filmId, Integer userId) {
-        Film film = (Film)filmStorage.getById(filmId);
-        User user = (User)userStorage.getById(userId);
+        Film film = filmStorage.getById(filmId);
+        User user = userStorage.getById(userId);
         filmValidationService.validateFilmId(filmId);
         userValidationService.validateUserId(userId);
         filmValidationService.validateIsLike(filmId, user);
@@ -82,8 +82,8 @@ public class FilmService {
     }
 
     public void deleteLike(Integer filmId, Integer userId) {
-        Film film = (Film)filmStorage.getById(filmId);
-        User user = (User)userStorage.getById(userId);
+        Film film = filmStorage.getById(filmId);
+        User user = userStorage.getById(userId);
         filmValidationService.validateFilmId(filmId);
         userValidationService.validateUserId(userId);
         filmValidationService.validateNotLike(filmId, user);
