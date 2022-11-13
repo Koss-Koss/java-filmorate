@@ -48,12 +48,12 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public Set<User> findFriendsById(@PathVariable("id") Integer userId) {
+    public List<User> findFriendsById(@PathVariable("id") Integer userId) {
         return service.findFriendsById(userId);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public Set<User> findMutualFriends(@PathVariable("id") Integer userId, @PathVariable("otherId") Integer otherUserId) {
+    public List<User> findMutualFriends(@PathVariable("id") Integer userId, @PathVariable("otherId") Integer otherUserId) {
         return service.findMutualFriends(userId, otherUserId);
     }
 }
