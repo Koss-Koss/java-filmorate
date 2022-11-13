@@ -102,7 +102,6 @@ public class FilmService {
         likeValidationService.validateIsLike(filmId, user);
         popularFilmsStorage.delete(film);
         likeStorage.add(film, user);
-        //film.setNumberOfLikes(likeStorage.getById(filmId).size());
         filmStorage.edit(filmId, film);
         popularFilmsStorage.add(film);
         log.info("Пользователь id={} поставил лайк фильму id={}", userId, filmId);
@@ -116,7 +115,6 @@ public class FilmService {
         likeValidationService.validateNotLike(filmId, user);
         popularFilmsStorage.delete(film);
         likeStorage.delete(film, user);
-        //film.setNumberOfLikes(likeStorage.getById(filmId).size());
         filmStorage.edit(filmId, film);
         popularFilmsStorage.add(film);
         log.info("Пользователь id={} удалил лайк фильму id={}", userId, filmId);

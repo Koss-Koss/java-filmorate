@@ -699,6 +699,7 @@ public class FilmorateApplicationDbIntegrationTests {
         filmDao.save(testFilmOne);
         filmDao.save(testFilmSecond);
         likesDao.save(testFilmOne, testUser.getId());
+        filmDao.save(testFilmOne);
 
         List<Film> films = filmDao.findPopularFilms(1);
         Film bestPopularFilm = films.get(films.size() - 1);
@@ -737,6 +738,9 @@ public class FilmorateApplicationDbIntegrationTests {
         likesDao.save(testFilmSecond, testUser.getId());
         likesDao.save(testFilmSecond, testFriend.getId());
         likesDao.save(testFilmThird, testUser.getId());
+        filmDao.save(testFilmOne);
+        filmDao.save(testFilmSecond);
+        filmDao.save(testFilmThird);
 
         List<Film> films = filmDao.findPopularFilms(2);
         Film bestPopularFilm = films.get(films.size() - 2);

@@ -44,7 +44,6 @@ public class LikesDaoImpl implements LikesDao {
     public void save(Film film, int userId) {
         int filmId = film.getId();
         jdbcTemplate.update("insert into likes (film_id, user_id) values (?, ?)", filmId, userId);
-        jdbcTemplate.update("update films set rate = ? where id = ?", findLikesById(filmId).size(), filmId);
         film.setNumberOfLikes(findLikesById(filmId).size());
     };
 
@@ -52,7 +51,6 @@ public class LikesDaoImpl implements LikesDao {
     public void delete(Film film, int userId) {
         int filmId = film.getId();
         jdbcTemplate.update("delete from likes where film_id = ? and user_id = ?", filmId, userId);
-        jdbcTemplate.update("update films set rate = ? where id = ?", findLikesById(filmId).size(), filmId);
         film.setNumberOfLikes(findLikesById(filmId).size());
     };
 
