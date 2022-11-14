@@ -3,22 +3,21 @@ package ru.yandex.practicum.filmorate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import ru.yandex.practicum.filmorate.controller.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.controller.exception.FilmValidationException;
-import ru.yandex.practicum.filmorate.controller.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.controller.exception.UserValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.controller.exception.*;
+import ru.yandex.practicum.filmorate.model.*;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -28,8 +27,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@AutoConfigureTestDatabase
 @AutoConfigureMockMvc
-class FilmorateApplicationTests {
+class FilmorateApplicationApiTests {
 	private static final String PATH_FILMS = "/films";
 	private static final String PATH_USERS = "/users";
 	@Autowired
@@ -39,10 +39,12 @@ class FilmorateApplicationTests {
 
 	@Test
 	void ValidFilmValidationTest() throws Exception {
+		MPA mpa = new MPA(1, "G");
+		List<Genre> genres = new ArrayList<>();
 		Film validFilm =
-				new Film(null, "TestFilmName", "Test".repeat(50), LocalDate.now(), 99, 0);
+				new Film(null, "TestFilmName", "Test".repeat(50), LocalDate.now(), 99, 0, Optional.of(mpa), genres);
 		Film validFilmExcepted =
-				new Film(1, "TestFilmName", "Test".repeat(50), LocalDate.now(), 99, 0);
+				new Film(1, "TestFilmName", "Test".repeat(50), LocalDate.now(), 99, 0, Optional.of(mpa), genres);
 		mockMvc.perform(post(PATH_FILMS)
 				.content(objectMapper.writeValueAsString(validFilm))
 				.contentType(MediaType.APPLICATION_JSON))
@@ -50,9 +52,11 @@ class FilmorateApplicationTests {
 					.andExpect(content().json(objectMapper.writeValueAsString(validFilmExcepted)));
 
 		Film editValidFilm =
-				new Film(1, "TestFilmName edit", "Edit".repeat(50), LocalDate.of(2022, Month.AUGUST, 11), 111, 0);
+				new Film(1, "TestFilmName edit", "Edit".repeat(50), LocalDate.of(2022, Month.AUGUST, 11),
+						111, 0, Optional.of(mpa), genres);
 		Film editValidFilmExcepted =
-				new Film(1, "TestFilmName edit", "Edit".repeat(50), LocalDate.of(2022, Month.AUGUST, 11), 111, 0);
+				new Film(1, "TestFilmName edit", "Edit".repeat(50), LocalDate.of(2022, Month.AUGUST, 11),
+						111, 0, Optional.of(mpa), genres);
 		mockMvc.perform(put(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(editValidFilm))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -80,7 +84,7 @@ class FilmorateApplicationTests {
 						assertTrue(mvcResult.getResolvedException() instanceof HttpMessageNotReadableException));
 
 		Film invalidFilmWithoutId =
-				new Film(null, "TestFilmName", "TestFilmDescription", LocalDate.now(), 99, 0);
+				new Film(null, "TestFilmName", "TestFilmDescription", LocalDate.now(), 99, 0, null, null);
 		mockMvc.perform(put(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithoutId))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -88,8 +92,10 @@ class FilmorateApplicationTests {
 				.andExpect(mvcResult ->
 						assertTrue(mvcResult.getResolvedException() instanceof FilmValidationException));
 
+		MPA mpa = new MPA(1, "G");
+		List<Genre> genres = new ArrayList<>();
 		Film invalidFilmWithNonExistentId =
-				new Film(999, "TestFilmName", "TestFilmDescription", LocalDate.now(), 99, 0);
+				new Film(999, "TestFilmName", "TestFilmDescription", LocalDate.now(), 99, 0, Optional.of(mpa), genres);
 		mockMvc.perform(put(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithNonExistentId))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -98,7 +104,7 @@ class FilmorateApplicationTests {
 						assertTrue(mvcResult.getResolvedException() instanceof FilmNotFoundException));
 
 		Film invalidFilmWithoutName =
-				new Film(null, null, "TestFilmDescription", LocalDate.now(), 99, 0);
+				new Film(null, null, "TestFilmDescription", LocalDate.now(), 99, 0, null, null);
 		mockMvc.perform(post(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithoutName))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -113,7 +119,7 @@ class FilmorateApplicationTests {
 						assertTrue(mvcResult.getResolvedException() instanceof MethodArgumentNotValidException));
 
 		Film invalidFilmWithEmptyName =
-				new Film(null, "", "TestFilmDescription", LocalDate.now(), 99, 0);
+				new Film(null, "", "TestFilmDescription", LocalDate.now(), 99, 0, null, null);
 		mockMvc.perform(post(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithEmptyName))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -128,7 +134,7 @@ class FilmorateApplicationTests {
 						assertTrue(mvcResult.getResolvedException() instanceof MethodArgumentNotValidException));
 
 		Film invalidFilmWithNameOverLimit =
-				new Film(null, "TestFilmName", "X".repeat(201), LocalDate.now(), 99, 0);
+				new Film(null, "TestFilmName", "X".repeat(201), LocalDate.now(), 99, 0, null, null);
 		mockMvc.perform(post(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithNameOverLimit))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -136,7 +142,7 @@ class FilmorateApplicationTests {
 				.andExpect(mvcResult ->
 						assertTrue(mvcResult.getResolvedException() instanceof MethodArgumentNotValidException));
 		invalidFilmWithNameOverLimit =
-				new Film(0, "TestFilmName", "X".repeat(201), LocalDate.now(), 99, 0);
+				new Film(0, "TestFilmName", "X".repeat(201), LocalDate.now(), 99, 0, null, null);
 		mockMvc.perform(put(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithNameOverLimit))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -145,7 +151,8 @@ class FilmorateApplicationTests {
 						assertTrue(mvcResult.getResolvedException() instanceof MethodArgumentNotValidException));
 
 		Film invalidFilmWithReleaseDateBeforeEraOfCinema =
-				new Film(null, "TestFilmName", "TestFilmDescription", LocalDate.of(1895, Month.DECEMBER, 27), 99, 0);
+				new Film(null, "TestFilmName", "TestFilmDescription", LocalDate.of(1895, Month.DECEMBER, 27),
+						99, 0, null, null);
 		mockMvc.perform(post(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithReleaseDateBeforeEraOfCinema))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -153,7 +160,8 @@ class FilmorateApplicationTests {
 				.andExpect(mvcResult ->
 						assertTrue(mvcResult.getResolvedException() instanceof FilmValidationException));
 		invalidFilmWithReleaseDateBeforeEraOfCinema =
-				new Film(0, "TestFilmName", "TestFilmDescription", LocalDate.of(1895, Month.DECEMBER, 27), 99, 0);
+				new Film(0, "TestFilmName", "TestFilmDescription", LocalDate.of(1895, Month.DECEMBER, 27),
+						99, 0, null, null);
 		mockMvc.perform(put(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithReleaseDateBeforeEraOfCinema))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -162,7 +170,7 @@ class FilmorateApplicationTests {
 						assertTrue(mvcResult.getResolvedException() instanceof FilmNotFoundException));
 
 		Film invalidFilmWithNegativeDuration =
-				new Film(null, "TestFilmName", "TestFilmDescription", LocalDate.now(), -1, 0);
+				new Film(null, "TestFilmName", "TestFilmDescription", LocalDate.now(), -1, 0, null, null);
 		mockMvc.perform(post(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithNegativeDuration))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -170,7 +178,7 @@ class FilmorateApplicationTests {
 				.andExpect(mvcResult ->
 						assertTrue(mvcResult.getResolvedException() instanceof MethodArgumentNotValidException));
 		invalidFilmWithNegativeDuration =
-				new Film(0, "TestFilmName", "TestFilmDescription", LocalDate.now(), -1, 0);
+				new Film(0, "TestFilmName", "TestFilmDescription", LocalDate.now(), -1, 0, null, null);
 		mockMvc.perform(put(PATH_FILMS)
 						.content(objectMapper.writeValueAsString(invalidFilmWithNegativeDuration))
 						.contentType(MediaType.APPLICATION_JSON))
@@ -355,5 +363,4 @@ class FilmorateApplicationTests {
 				.andExpect(mvcResult ->
 						assertTrue(mvcResult.getResolvedException() instanceof MethodArgumentNotValidException));
 	}
-
 }

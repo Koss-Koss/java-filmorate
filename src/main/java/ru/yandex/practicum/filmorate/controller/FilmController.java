@@ -27,9 +27,7 @@ public class FilmController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping()
-    public Film create(@Valid @RequestBody Film film) {
-        return service.create(film);
-    }
+    public Film create(@Valid @RequestBody Film film) { return service.create(film); }
 
     @PutMapping()
     public Film update(@Valid @RequestBody Film film) {
@@ -50,5 +48,4 @@ public class FilmController {
     public List<Film> findPopularFilms(@RequestParam(defaultValue = "10", required = false) Integer count) {
         return service.findPopularFilms(count);
     }
-
 }

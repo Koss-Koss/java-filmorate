@@ -10,5 +10,4 @@ public class UserNotFoundException extends RuntimeException {
     public String getParameter() {
         return parameter;
     }
-
 }

@@ -1,14 +1,16 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.Comparator;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
+@Builder
 public class Film implements Comparable<Film> {
     private Integer id;
     @NotBlank(message = "Название фильма - обязательное поле и не может быть пустым")
@@ -19,6 +21,8 @@ public class Film implements Comparable<Film> {
     @Positive(message = "Продолжительность фильма указыввается в минутах и должна быть положительной")
     private int duration;
     private int numberOfLikes;
+    private Optional<MPA> mpa;
+    List<Genre> genres;
 
     @Override
     public int compareTo(Film o) {
@@ -26,5 +30,4 @@ public class Film implements Comparable<Film> {
                 .thenComparingInt(Film::getId)
                 .compare(this, o);
     }
-
 }
